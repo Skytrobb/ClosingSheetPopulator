@@ -1,8 +1,23 @@
 import pdfplumber
 import re
+import sys
+import argparse
+
 from datetime import datetime
 from write import update_value
 from get_table import get_table_dict
+
+
+parser = argparse.ArgumentParser(description='extract from pdf and put it in a spreadsheet')
+parser.add_argument('--pdf', default="./purchaseAgreement.pd",
+                    help='location of the purchaseAgreement')
+parser.add_argument('--sheet', default="1dJVtKrP1GD15_ZQE-7FrtMFTAKUIosT80HhQqToPBE0", help="google sheet ID, found in url")
+
+
+args = parser.parse_args()
+pdf_location=args.pdf
+sheet_id = args.sheet
+print(pdf_location, sheet_id)
 
 date_mapping = {
     "C9": [13, 0],
@@ -10,13 +25,15 @@ date_mapping = {
     "C11": [13, 2],
     "D9": [10, 0],
     "D10": [10, 1],
-    "D11": [10, 1],
-    "B13": [6, 0],
+    "D11": [10, 2],
+    "B5": [7, 0], # this would be the closing value but something is wrong with the cell
+    "B13": [6, 1],
+    "B14": [6, 0],
 }
 
 
 def get_date_from_page (page, datePosition):
-    with pdfplumber.open("./purchaseAgreement.pdf") as pdf:
+    with pdfplumber.open(pdf_location) as pdf:
         first_date = pdf.pages[page]
         text = first_date.extract_text()
         remove_underscores = text.replace('_', '')
@@ -25,8 +42,14 @@ def get_date_from_page (page, datePosition):
         # date = datetime.strptime(match.group(), '%m/%d/%Y').date()
 
         # result = re.findall(date_pattern, remove_underscores)
+        
+    try:
+      date = match[datePosition]
+    except IndexError:
+      print("thats weeohd")
+      return "date not found"
 
-    return match[datePosition]
+    return date
 
 # my_value = get_date_from_page(6, 0)
 
@@ -49,7 +72,7 @@ def update_values_with_map():
     values = create_update_value_map()
     for cell in values:
         print(cell, values[cell])
-        update_value(cell, "USER_ENTERED", values[cell])
+        update_value(cell, "USER_ENTERED", values[cell], sheet_id)
 
 update_values_with_map()
 

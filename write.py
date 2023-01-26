@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import sys
 import google.auth
 import os.path
 from googleapiclient.discovery import build
@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 
-def update_value(range_name, value_input_option, my_value, spreadsheet_id="1wuBRQr9zIXSR9-9XWxcseBQsOyNd16ToxtjrCxiyZXw"):
+def update_value(range_name, value_input_option, my_value, spreadsheet_id):
     """
     Creates the batch_update the user has access to.
     Load pre-authorized user credentials from the environment.
